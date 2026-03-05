@@ -7,7 +7,7 @@
 	},
 	"files": {
 		"ignoreUnknown": true,
-		"ignore": ["node_modules", ".next", "drizzle"]
+		"includes": ["**", "!node_modules", "!.next", "!drizzle"]
 	},
 	"formatter": {
 		"enabled": true,
@@ -22,6 +22,11 @@
 	"javascript": {
 		"formatter": {
 			"quoteStyle": "double"
+		}
+	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
 		}
 	},
 	"assist": {
