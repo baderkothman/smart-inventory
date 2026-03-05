@@ -3,12 +3,6 @@
 import { LayoutDashboard, Package, PackagePlus } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Separator } from "@/components/ui/separator";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 const NAV_ITEMS = [
 	{
@@ -29,50 +23,56 @@ export function Sidebar() {
 	const pathname = usePathname();
 
 	return (
-		<aside className="flex h-full w-60 flex-col border-r bg-card">
+		<aside className="flex h-full w-56 flex-col border-r border-sidebar-border bg-sidebar">
 			{/* Logo */}
-			<div className="flex h-14 items-center gap-2 px-5">
-				<Package className="h-5 w-5 text-primary" />
-				<span className="text-base font-bold tracking-tight">
-					Smart
-					<span className="text-muted-foreground font-normal">Inventory</span>
+			<div className="flex h-14 items-center gap-3 px-5">
+				<div className="flex h-7 w-7 shrink-0 items-center justify-center rounded border border-primary/30 bg-primary/10">
+					<Package className="h-3.5 w-3.5 text-primary" />
+				</div>
+				<span className="font-mono text-sm font-semibold tracking-tight text-foreground">
+					smart<span className="text-primary">inv</span>
 				</span>
 			</div>
 
-			<Separator />
+			<div className="mx-4 h-px bg-sidebar-border" />
 
 			{/* Navigation */}
-			<nav className="flex-1 space-y-1 px-3 py-4">
-				{NAV_ITEMS.map(({ href, label, icon: Icon, exact }) => {
-					const isActive = exact
-						? pathname === href
-						: pathname.startsWith(href);
-					return (
-						<Tooltip key={href} delayDuration={300}>
-							<TooltipTrigger asChild>
-								<Link
-									href={href}
-									className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-										isActive
-											? "bg-primary text-primary-foreground"
-											: "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-									}`}
-								>
-									<Icon className="h-4 w-4 shrink-0" />
-									{label}
-								</Link>
-							</TooltipTrigger>
-							<TooltipContent side="right">{label}</TooltipContent>
-						</Tooltip>
-					);
-				})}
+			<nav className="flex-1 px-3 py-4">
+				<p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+					Navigation
+				</p>
+				<div className="space-y-0.5">
+					{NAV_ITEMS.map(({ href, label, icon: Icon, exact }) => {
+						const isActive = exact
+							? pathname === href
+							: pathname.startsWith(href);
+						return (
+							<Link
+								key={href}
+								href={href}
+								className={`relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-150 ${
+									isActive
+										? "bg-primary/10 text-primary"
+										: "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+								}`}
+							>
+								{isActive && (
+									<span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r bg-primary" />
+								)}
+								<Icon className="h-4 w-4 shrink-0" />
+								{label}
+							</Link>
+						);
+					})}
+				</div>
 			</nav>
 
-			<Separator />
+			<div className="mx-4 h-px bg-sidebar-border" />
 
 			<div className="px-5 py-4">
-				<p className="text-xs text-muted-foreground">Smart Inventory Hub</p>
-				<p className="text-xs text-muted-foreground">v1.0.0</p>
+				<p className="font-mono text-[10px] text-muted-foreground">
+					v1.0.0
+				</p>
 			</div>
 		</aside>
 	);

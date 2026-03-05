@@ -134,7 +134,9 @@ export function AssetForm({ defaultValues }: AssetFormProps) {
 				{/* Basic Information */}
 				<Card>
 					<CardHeader>
-						<CardTitle>Basic Information</CardTitle>
+						<CardTitle className="font-mono text-sm font-semibold">
+						Basic Information
+					</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						{/* Name */}
@@ -322,7 +324,7 @@ export function AssetForm({ defaultValues }: AssetFormProps) {
 				{/* Notes */}
 				<Card>
 					<CardHeader>
-						<CardTitle>Notes</CardTitle>
+						<CardTitle className="font-mono text-sm font-semibold">Notes</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<FormField
