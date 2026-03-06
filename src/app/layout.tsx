@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AppClerkProvider } from "@/components/providers/clerk-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -26,16 +27,22 @@ export default function RootLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<html lang="en" className="dark">
+		<html lang="en" suppressHydrationWarning>
 			<body
 				className={`${geist.variable} ${jetbrainsMono.variable} font-sans antialiased`}
 			>
-				<AppClerkProvider>
-					<TooltipProvider>
-						{children}
-						<Toaster richColors position="bottom-right" />
-					</TooltipProvider>
-				</AppClerkProvider>
+				<ThemeProvider
+					attribute="class"
+					defaultTheme="dark"
+					enableSystem={false}
+				>
+					<AppClerkProvider>
+						<TooltipProvider>
+							{children}
+							<Toaster richColors position="bottom-right" />
+						</TooltipProvider>
+					</AppClerkProvider>
+				</ThemeProvider>
 			</body>
 		</html>
 	);

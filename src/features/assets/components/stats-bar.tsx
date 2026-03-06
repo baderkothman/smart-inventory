@@ -51,15 +51,15 @@ export function StatsBar({ assets }: StatsBarProps) {
 			{stats.map(({ label, value, icon: Icon, color, bg, border }) => (
 				<div
 					key={label}
-					className={`flex items-center gap-4 rounded-lg border ${border} bg-card px-5 py-4`}
+					className={`flex items-center gap-3 rounded-lg border ${border} bg-card px-3 py-3 sm:gap-4 sm:px-5 sm:py-4`}
 				>
 					<div
-						className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${bg}`}
+						className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg sm:h-9 sm:w-9 ${bg}`}
 					>
 						<Icon className={`h-4 w-4 ${color}`} />
 					</div>
 					<div>
-						<p className="font-mono text-2xl font-semibold tabular-nums text-foreground">
+						<p className="font-mono text-xl font-semibold tabular-nums text-foreground sm:text-2xl">
 							{value}
 						</p>
 						<p className="text-xs text-muted-foreground">{label}</p>

@@ -15,6 +15,7 @@ import {
 } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import { Plus, Search } from "lucide-react";
+import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -96,12 +97,30 @@ const darkGridTheme = themeQuartz.withParams({
 	cellHorizontalPaddingScale: 1,
 });
 
+const lightGridTheme = themeQuartz.withParams({
+	backgroundColor: "oklch(1 0 0)",
+	headerBackgroundColor: "oklch(0.97 0 0)",
+	rowHoverColor: "oklch(0.96 0 0)",
+	borderColor: "oklch(0.90 0 0)",
+	fontFamily: "var(--font-geist, ui-sans-serif)",
+	fontSize: 13,
+	headerFontSize: 11,
+	accentColor: "oklch(0.68 0.19 190)",
+	textColor: "oklch(0.145 0 0)",
+	headerTextColor: "oklch(0.45 0 0)",
+	selectedRowBackgroundColor: "oklch(0.68 0.19 190 / 8%)",
+	oddRowBackgroundColor: "oklch(0.985 0 0)",
+	cellHorizontalPaddingScale: 1,
+});
+
 interface AssetGridProps {
 	initialData: Asset[];
 }
 
 export function AssetGrid({ initialData }: AssetGridProps) {
 	const router = useRouter();
+	const { resolvedTheme } = useTheme();
+	const gridTheme = resolvedTheme === "light" ? lightGridTheme : darkGridTheme;
 	const gridRef = useRef<AgGridReact<Asset>>(null);
 	const [rowData, setRowData] = useState<Asset[]>(initialData);
 	const [quickFilter, setQuickFilter] = useState("");
@@ -229,25 +248,25 @@ export function AssetGrid({ initialData }: AssetGridProps) {
 	return (
 		<div className="flex min-h-0 flex-1 flex-col gap-3">
 			{/* Toolbar */}
-			<div className="flex items-center justify-between gap-4">
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<div className="flex items-center gap-3">
-					<div className="relative">
+					<div className="relative flex-1 sm:flex-none">
 						<Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
 						<Input
 							placeholder="Search assets..."
 							value={quickFilter}
 							onChange={(e) => onFilterInput(e.target.value)}
-							className="h-9 w-64 pl-9 font-mono text-xs"
+							className="h-9 w-full pl-9 font-mono text-xs sm:w-64"
 						/>
 					</div>
-					<span className="font-mono text-xs text-muted-foreground tabular-nums">
+					<span className="hidden font-mono text-xs text-muted-foreground tabular-nums sm:inline">
 						{rowData.length} records
 					</span>
 				</div>
 				<Button
 					size="sm"
 					onClick={() => router.push("/dashboard/assets/new")}
-					className="gap-1.5"
+					className="w-full gap-1.5 sm:w-auto"
 				>
 					<Plus className="h-3.5 w-3.5" />
 					Add Asset
@@ -258,7 +277,7 @@ export function AssetGrid({ initialData }: AssetGridProps) {
 			<div className="min-h-0 flex-1 overflow-hidden rounded-lg border border-border">
 				<AgGridReact<Asset>
 					ref={gridRef}
-					theme={darkGridTheme}
+					theme={gridTheme}
 					rowData={rowData}
 					columnDefs={columnDefs}
 					defaultColDef={defaultColDef}
