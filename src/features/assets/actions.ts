@@ -29,8 +29,8 @@ export async function createAsset(data: unknown) {
 		notes: validated.notes ?? null,
 	});
 
-	revalidatePath("/dashboard");
-	redirect("/dashboard");
+	revalidatePath("/dashboard/assets");
+	redirect("/dashboard/assets");
 }
 
 export async function updateAsset(id: string, data: unknown) {
@@ -57,7 +57,7 @@ export async function updateAsset(id: string, data: unknown) {
 		})
 		.where(and(eq(assets.id, id), eq(assets.userId, userId)));
 
-	revalidatePath("/dashboard");
+	revalidatePath("/dashboard/assets");
 }
 
 export async function deleteAsset(id: string) {
@@ -68,5 +68,5 @@ export async function deleteAsset(id: string) {
 		.delete(assets)
 		.where(and(eq(assets.id, id), eq(assets.userId, userId)));
 
-	revalidatePath("/dashboard");
+	revalidatePath("/dashboard/assets");
 }

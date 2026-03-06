@@ -10,13 +10,13 @@ import {
 	QuickFilterModule,
 	RowSelectionModule,
 	TextFilterModule,
-	ValidationModule,
 	themeQuartz,
+	ValidationModule,
 } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import { Plus, Search } from "lucide-react";
-import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,36 +30,34 @@ import type { Asset } from "@/db/schema";
 import { AssetActionsMenu } from "./asset-actions-menu";
 import { AssetForm } from "./asset-form";
 
-const STATUS_STYLES: Record<
-	string,
-	{ dot: string; text: string; bg: string }
-> = {
-	active: {
-		dot: "bg-emerald-400",
-		text: "text-emerald-400",
-		bg: "bg-emerald-400/10",
-	},
-	inactive: {
-		dot: "bg-muted-foreground",
-		text: "text-muted-foreground",
-		bg: "bg-muted/50",
-	},
-	maintenance: {
-		dot: "bg-amber-400",
-		text: "text-amber-400",
-		bg: "bg-amber-400/10",
-	},
-	retired: {
-		dot: "bg-destructive",
-		text: "text-destructive",
-		bg: "bg-destructive/10",
-	},
-	assigned: {
-		dot: "bg-primary",
-		text: "text-primary",
-		bg: "bg-primary/10",
-	},
-};
+const STATUS_STYLES: Record<string, { dot: string; text: string; bg: string }> =
+	{
+		active: {
+			dot: "bg-emerald-400",
+			text: "text-emerald-400",
+			bg: "bg-emerald-400/10",
+		},
+		inactive: {
+			dot: "bg-muted-foreground",
+			text: "text-muted-foreground",
+			bg: "bg-muted/50",
+		},
+		maintenance: {
+			dot: "bg-amber-400",
+			text: "text-amber-400",
+			bg: "bg-amber-400/10",
+		},
+		retired: {
+			dot: "bg-destructive",
+			text: "text-destructive",
+			bg: "bg-destructive/10",
+		},
+		assigned: {
+			dot: "bg-primary",
+			text: "text-primary",
+			bg: "bg-primary/10",
+		},
+	};
 
 function StatusRenderer({ value }: { value: string }) {
 	const style = STATUS_STYLES[value] ?? STATUS_STYLES.inactive;

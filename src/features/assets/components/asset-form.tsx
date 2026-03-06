@@ -112,7 +112,7 @@ export function AssetForm({ defaultValues }: AssetFormProps) {
 				if (isEditing && defaultValues) {
 					await updateAsset(defaultValues.id, values);
 					toast.success("Asset updated successfully.");
-					router.push("/dashboard");
+					router.push("/dashboard/assets");
 				} else {
 					await createAsset(values);
 					// redirect happens inside createAsset
@@ -135,8 +135,8 @@ export function AssetForm({ defaultValues }: AssetFormProps) {
 				<Card>
 					<CardHeader>
 						<CardTitle className="font-mono text-sm font-semibold">
-						Basic Information
-					</CardTitle>
+							Basic Information
+						</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						{/* Name */}
@@ -324,7 +324,9 @@ export function AssetForm({ defaultValues }: AssetFormProps) {
 				{/* Notes */}
 				<Card>
 					<CardHeader>
-						<CardTitle className="font-mono text-sm font-semibold">Notes</CardTitle>
+						<CardTitle className="font-mono text-sm font-semibold">
+							Notes
+						</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<FormField

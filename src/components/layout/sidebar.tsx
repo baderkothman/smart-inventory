@@ -1,20 +1,20 @@
 "use client";
 
-import { LayoutDashboard, Package, PackagePlus } from "lucide-react";
+import { LayoutDashboard, Package } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
 	{
 		href: "/dashboard",
-		label: "Dashboard",
+		label: "Overview",
 		icon: LayoutDashboard,
 		exact: true,
 	},
 	{
-		href: "/dashboard/assets/new",
-		label: "Add Asset",
-		icon: PackagePlus,
+		href: "/dashboard/assets",
+		label: "Assets",
+		icon: Package,
 		exact: false,
 	},
 ];
@@ -70,9 +70,7 @@ export function Sidebar() {
 			<div className="mx-4 h-px bg-sidebar-border" />
 
 			<div className="px-5 py-4">
-				<p className="font-mono text-[10px] text-muted-foreground">
-					v1.0.0
-				</p>
+				<p className="font-mono text-[10px] text-muted-foreground">v1.0.0</p>
 			</div>
 		</aside>
 	);

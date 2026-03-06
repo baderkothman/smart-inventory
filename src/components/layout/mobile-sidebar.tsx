@@ -1,27 +1,23 @@
 "use client";
 
-import { LayoutDashboard, Menu, Package, PackagePlus } from "lucide-react";
+import { LayoutDashboard, Menu, Package } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-	Sheet,
-	SheetContent,
-	SheetTitle,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 const NAV_ITEMS = [
 	{
 		href: "/dashboard",
-		label: "Dashboard",
+		label: "Overview",
 		icon: LayoutDashboard,
 		exact: true,
 	},
 	{
-		href: "/dashboard/assets/new",
-		label: "Add Asset",
-		icon: PackagePlus,
+		href: "/dashboard/assets",
+		label: "Assets",
+		icon: Package,
 		exact: false,
 	},
 ];
@@ -43,7 +39,10 @@ export function MobileSidebar() {
 			</Button>
 
 			<Sheet open={open} onOpenChange={setOpen}>
-				<SheetContent side="left" className="w-56 p-0 bg-sidebar border-sidebar-border">
+				<SheetContent
+					side="left"
+					className="w-56 p-0 bg-sidebar border-sidebar-border"
+				>
 					<SheetTitle className="sr-only">Navigation</SheetTitle>
 
 					{/* Logo */}

@@ -2,6 +2,13 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* Hide Clerk's built-in footer (replaced by custom flip buttons) */
+.cl-footer,
+.cl-footerAction {
+	/* biome-ignore lint/complexity/noImportantStyles: Clerk's internal styles require !important to override */
+	display: none !important;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -78,13 +85,13 @@
 	--sidebar-primary-foreground: oklch(0.985 0 0);
 	--sidebar-accent: oklch(0.94 0 0);
 	--sidebar-accent-foreground: oklch(0.145 0 0);
-	--sidebar-border: oklch(0.90 0 0);
+	--sidebar-border: oklch(0.9 0 0);
 	--sidebar-ring: oklch(0.68 0.19 190);
 }
 
 .dark {
 	--radius: 0.5rem;
-	--background: oklch(0.10 0.015 252);
+	--background: oklch(0.1 0.015 252);
 	--foreground: oklch(0.91 0.01 252);
 	--card: oklch(0.14 0.015 252);
 	--card-foreground: oklch(0.91 0.01 252);
@@ -113,7 +120,7 @@
 	--sidebar-primary-foreground: oklch(0.08 0.01 252);
 	--sidebar-accent: oklch(0.15 0.018 252);
 	--sidebar-accent-foreground: oklch(0.91 0.01 252);
-	--sidebar-border: oklch(0.20 0.018 252);
+	--sidebar-border: oklch(0.2 0.018 252);
 	--sidebar-ring: oklch(0.74 0.19 192);
 }
 

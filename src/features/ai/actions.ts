@@ -31,10 +31,44 @@ Asset Details:
 The description should cover: what the asset is and its primary function, key technical characteristics, and typical use case in a business environment. Output only the description text, no labels or prefixes.`;
 
 	const ai = getGeminiClient();
-	const response = await ai.models.generateContent({
-		model: "gemini-2.0-flash",
-		contents: prompt,
-	});
-
-	return response.text?.trim() ?? "";
+	try {
+		const response = await ai.models.generateContent({
+			model: "gemini-2.5-flash",
+			contents: prompt,
+		});
+		return response.text?.trim() ?? "";
+	} catch (err) {
+		const msg = err instanceof Error ? err.message : String(err);
+		console.error("[Gemini] generateDescription error:", msg);
+		if (
+			msg.includes("429") ||
+			msg.includes("RESOURCE_EXHAUSTED") ||
+			msg.includes("quota") ||
+			msg.includes("rate limit")
+		) {
+			throw new Error(
+				"Gemini API quota exceeded. Please try again later or upgrade your plan.",
+			);
+		}
+		if (
+			msg.includes("API key") ||
+			msg.includes("API_KEY") ||
+			msg.includes("401") ||
+			msg.includes("403")
+		) {
+			throw new Error(
+				"Gemini API key is invalid or missing. Check your GEMINI_API_KEY in .env.local.",
+			);
+		}
+		if (
+			msg.includes("404") ||
+			msg.includes("NOT_FOUND") ||
+			msg.includes("no longer available")
+		) {
+			throw new Error(
+				"Gemini model unavailable. The API key may not have access to this model.",
+			);
+		}
+		throw new Error(`AI generation failed: ${msg}`);
+	}
 }
