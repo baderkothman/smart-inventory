@@ -5,6 +5,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 export function AppClerkProvider({ children }: { children: React.ReactNode }) {
 	return (
 		<ClerkProvider
+			signInUrl="/"
+			signUpUrl="/"
 			appearance={{
 				variables: {
 					colorPrimary: "var(--primary)",

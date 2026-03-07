@@ -44,71 +44,73 @@ function useClerkAppearance() {
 }
 
 export function FlipAuthCard() {
-	const [flipped, setFlipped] = useState(false);
+	const [mode, setMode] = useState<"signIn" | "signUp">("signIn");
+	const [rotation, setRotation] = useState(0);
 	const clerkAppearance = useClerkAppearance();
+
+	const switchTo = (newMode: "signIn" | "signUp") => {
+		// Phase 1: rotate to 90° (card becomes edge-on)
+		setRotation(90);
+		setTimeout(() => {
+			// Phase 2: swap content + jump to -90° with no transition
+			setMode(newMode);
+			setRotation(-90);
+			// Phase 3: wait two frames so -90° is painted, then animate to 0°
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
+					setRotation(0);
+				});
+			});
+		}, 420);
+	};
 
 	return (
 		<div className="w-full" style={{ perspective: "1200px" }}>
-			{/*
-			  Both faces share the same grid cell (gridArea "1/1").
-			  The grid grows to fit the TALLEST face, so content below
-			  always sits beneath the full form height — no overlap.
-			*/}
 			<div
-				className="transition-all duration-700 ease-in-out"
 				style={{
-					display: "grid",
-					transformStyle: "preserve-3d",
-					transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+					transform: `rotateY(${rotation}deg)`,
+					transition: rotation === -90 ? "none" : "transform 420ms cubic-bezier(0.65, 0, 0.35, 1)",
 				}}
 			>
-				{/* Front — Sign In */}
-				<div
-					className="w-full"
-					style={{ gridArea: "1/1", backfaceVisibility: "hidden" }}
-				>
-					<SignIn
-						routing="hash"
-						fallbackRedirectUrl="/dashboard"
-						appearance={clerkAppearance}
-					/>
-					<p className="mt-4 text-center text-sm text-muted-foreground">
-						Don&apos;t have an account?{" "}
-						<button
-							type="button"
-							onClick={() => setFlipped(true)}
-							className="font-medium text-primary hover:underline"
-						>
-							Create one
-						</button>
-					</p>
-				</div>
-
-				{/* Back — Sign Up */}
-				<div
-					className="w-full"
-					style={{
-						gridArea: "1/1",
-						backfaceVisibility: "hidden",
-						transform: "rotateY(180deg)",
-					}}
-				>
-					<SignUp
-						routing="hash"
-						fallbackRedirectUrl="/dashboard"
-						appearance={clerkAppearance}
-					/>
-					<p className="mt-4 text-center text-sm text-muted-foreground">
-						Already have an account?{" "}
-						<button
-							type="button"
-							onClick={() => setFlipped(false)}
-							className="font-medium text-primary hover:underline"
-						>
-							Sign in
-						</button>
-					</p>
-				</div>
+				{mode === "signIn" ? (
+					<>
+						<SignIn
+							routing="virtual"
+							signUpUrl="/"
+							fallbackRedirectUrl="/dashboard"
+							appearance={clerkAppearance}
+						/>
+						<p className="mt-4 text-center text-sm text-muted-foreground">
+							Don&apos;t have an account?{" "}
+							<button
+								type="button"
+								onClick={() => switchTo("signUp")}
+								className="font-medium text-primary hover:underline"
+							>
+								Create one
+							</button>
+						</p>
+					</>
+				) : (
+					<>
+						<SignUp
+							routing="virtual"
+							signInUrl="/"
+							fallbackRedirectUrl="/dashboard"
+							appearance={clerkAppearance}
+						/>
+						<p className="mt-4 text-center text-sm text-muted-foreground">
+							Already have an account?{" "}
+							<button
+								type="button"
+								onClick={() => switchTo("signIn")}
+								className="font-medium text-primary hover:underline"
+							>
+								Sign in
+							</button>
+						</p>
+					</>
+				)}
 			</div>
 		</div>
 	);
