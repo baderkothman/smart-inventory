@@ -29,7 +29,7 @@ Every asset is scoped to the authenticated user — no cross-account data leakag
 | **Full CRUD** | Create, view, edit, and delete assets via server actions — no API routes |
 | **Secure by Default** | Row-level ownership enforced on every query via Clerk `userId` |
 | **Flip Auth Card** | Sign in / sign up on the landing page via a 3D flipping card |
-| **Dark / Light Theme** | Full theme support via `next-themes` with system default |
+| **Dark / Light Theme** | Full theme support via `next-themes`; defaults to dark, toggleable via header button |
 | **Responsive Layout** | Mobile-first design with collapsible sidebar and responsive tables |
 
 **Asset fields:** name, category, status, serial number, manufacturer, model, purchase date, location, assigned to, description, notes.
@@ -120,20 +120,22 @@ smart-inventory/
 │   ├── app/
 │   │   ├── page.tsx             # Landing page (flip auth card + feature overview)
 │   │   ├── layout.tsx           # Root layout (theme provider, Clerk provider)
-│   │   └── dashboard/
-│   │       ├── layout.tsx       # Dashboard shell (sidebar + topbar)
-│   │       ├── page.tsx         # Analytics overview (KPIs, charts, recent assets)
-│   │       └── assets/
-│   │           ├── page.tsx     # Assets listing (searchable table)
-│   │           └── new/
-│   │               └── page.tsx # Add new asset form
+│   │   ├── dashboard/
+│   │   │   ├── layout.tsx       # Dashboard shell (sidebar + navbar)
+│   │   │   └── page.tsx         # Analytics overview (KPIs, charts, recent assets)
+│   │   └── assets/              # Route: /assets (uses same dashboard shell)
+│   │       ├── layout.tsx       # Shared shell layout (sidebar + navbar)
+│   │       ├── page.tsx         # Assets listing (AG Grid, searchable)
+│   │       └── new/
+│   │           └── page.tsx     # Add new asset form
 │   ├── components/
 │   │   ├── auth/
 │   │   │   └── flip-auth-card.tsx   # 3D flip card with Clerk SignIn / SignUp
 │   │   ├── layout/
 │   │   │   ├── sidebar.tsx          # Desktop sidebar navigation
 │   │   │   ├── mobile-sidebar.tsx   # Mobile slide-out sidebar
-│   │   │   └── topbar.tsx           # Top navigation bar
+│   │   │   ├── navbar.tsx           # Top navigation bar
+│   │   │   └── theme-toggle.tsx     # Dark/light mode toggle button
 │   │   ├── providers/
 │   │   │   ├── clerk-provider.tsx   # Clerk context wrapper
 │   │   │   └── theme-provider.tsx   # next-themes wrapper
@@ -188,7 +190,7 @@ assets (
 - **Middleware lives in `src/proxy.ts`**, not `middleware.ts`. This is intentional for Next.js 16 compatibility.
 - **Tailwind v4** uses `@import "tailwindcss"` in `globals.css` with no `tailwind.config.js`.
 - **Zod v4 + react-hook-form:** Enum fields use `useForm` defaults instead of `.default()` in the Zod schema due to a known incompatibility.
-- **Gemini model:** Uses `gemini-2.5-flash` via the v1beta API endpoint. Older models (`gemini-2.0-flash`, `gemini-1.5-flash`) are not available for new API keys.
+- **Gemini model:** Uses `gemini-2.5-flash`. Older models (`gemini-2.0-flash`, `gemini-1.5-flash`) may not be available for new API keys.
 
 ---
 
