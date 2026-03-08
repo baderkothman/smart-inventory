@@ -75,7 +75,7 @@ export function FlipAuthCard() {
 				{mode === "signIn" ? (
 					<>
 						<SignIn
-							routing="virtual"
+							routing="hash"
 							signUpUrl="/"
 							fallbackRedirectUrl="/dashboard"
 							appearance={clerkAppearance}
@@ -94,7 +94,7 @@ export function FlipAuthCard() {
 				) : (
 					<>
 						<SignUp
-							routing="virtual"
+							routing="hash"
 							signInUrl="/"
 							fallbackRedirectUrl="/dashboard"
 							appearance={clerkAppearance}
