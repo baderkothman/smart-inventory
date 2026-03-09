@@ -1,79 +1,94 @@
 "use client";
 
-import type { ColDef, GridReadyEvent } from "ag-grid-community";
+import type { ColDef, GridReadyEvent, IRowNode } from "ag-grid-community";
 import {
 	ClientSideRowModelModule,
 	ColumnAutoSizeModule,
 	DateFilterModule,
+	ExternalFilterModule,
 	NumberFilterModule,
 	PaginationModule,
 	QuickFilterModule,
-	RowSelectionModule,
 	TextFilterModule,
-	themeQuartz,
 	ValidationModule,
+	themeQuartz,
 } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, SlidersHorizontal, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import {
 	Sheet,
 	SheetContent,
 	SheetHeader,
 	SheetTitle,
 } from "@/components/ui/sheet";
+import { assetCategoryEnum, assetStatusEnum } from "@/db/schema";
 import type { Asset } from "@/db/schema";
 import { AssetActionsMenu } from "./asset-actions-menu";
 import { AssetForm } from "./asset-form";
 
-const STATUS_STYLES: Record<string, { dot: string; text: string; bg: string }> =
+const STATUS_COLORS: Record<string, { dot: string; text: string; bg: string }> =
 	{
-		active: {
-			dot: "bg-emerald-400",
-			text: "text-emerald-400",
-			bg: "bg-emerald-400/10",
-		},
-		inactive: {
-			dot: "bg-muted-foreground",
-			text: "text-muted-foreground",
-			bg: "bg-muted/50",
-		},
-		maintenance: {
-			dot: "bg-amber-400",
-			text: "text-amber-400",
-			bg: "bg-amber-400/10",
-		},
-		retired: {
-			dot: "bg-destructive",
-			text: "text-destructive",
-			bg: "bg-destructive/10",
-		},
-		assigned: {
-			dot: "bg-primary",
-			text: "text-primary",
-			bg: "bg-primary/10",
-		},
+		active:      { dot: "#34d399", text: "#34d399", bg: "rgba(52,211,153,0.1)" },
+		inactive:    { dot: "#94a3b8", text: "#94a3b8", bg: "rgba(148,163,184,0.1)" },
+		maintenance: { dot: "#fbbf24", text: "#fbbf24", bg: "rgba(251,191,36,0.1)" },
+		retired:     { dot: "#f87171", text: "#f87171", bg: "rgba(248,113,113,0.1)" },
+		assigned:    { dot: "#38bdf8", text: "#38bdf8", bg: "rgba(56,189,248,0.1)" },
 	};
 
+const CATEGORY_COLORS: Record<string, string> = {
+	laptop:     "#38bdf8",
+	monitor:    "#818cf8",
+	license:    "#fbbf24",
+	peripheral: "#34d399",
+	server:     "#f87171",
+	mobile:     "#a78bfa",
+	other:      "#94a3b8",
+};
+
 function StatusRenderer({ value }: { value: string }) {
-	const style = STATUS_STYLES[value] ?? STATUS_STYLES.inactive;
+	const s = STATUS_COLORS[value] ?? STATUS_COLORS.inactive;
 	return (
-		<span
-			className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${style.bg} ${style.text}`}
-		>
-			<span className={`h-1.5 w-1.5 rounded-full ${style.dot}`} />
+		<span style={{
+			display: "inline-flex",
+			alignItems: "center",
+			gap: 5,
+			borderRadius: 4,
+			padding: "1px 7px",
+			fontSize: 11,
+			fontWeight: 500,
+			background: s.bg,
+			color: s.text,
+			textTransform: "capitalize",
+		}}>
+			<span style={{ width: 6, height: 6, borderRadius: "50%", background: s.dot, flexShrink: 0 }} />
 			{value}
 		</span>
 	);
 }
 
 function CategoryRenderer({ value }: { value: string }) {
+	const color = CATEGORY_COLORS[value] ?? CATEGORY_COLORS.other;
 	return (
-		<span className="inline-flex items-center rounded border border-border bg-muted/40 px-2 py-0.5 font-mono text-[11px] capitalize text-muted-foreground">
+		<span style={{
+			display: "inline-flex",
+			alignItems: "center",
+			gap: 6,
+			fontSize: 12,
+			textTransform: "capitalize",
+		}}>
+			<span style={{ width: 7, height: 7, borderRadius: 2, background: color, flexShrink: 0 }} />
 			{value}
 		</span>
 	);
@@ -81,9 +96,11 @@ function CategoryRenderer({ value }: { value: string }) {
 
 const darkGridTheme = themeQuartz.withParams({
 	backgroundColor: "oklch(0.14 0.015 252)",
+	foregroundColor: "oklch(0.91 0.01 252)",
 	headerBackgroundColor: "oklch(0.11 0.012 252)",
 	rowHoverColor: "oklch(0.18 0.015 252)",
 	borderColor: "oklch(0.22 0.02 252)",
+	chromeBackgroundColor: "oklch(0.18 0.015 252)",
 	fontFamily: "var(--font-geist, ui-sans-serif)",
 	fontSize: 13,
 	headerFontSize: 11,
@@ -93,13 +110,27 @@ const darkGridTheme = themeQuartz.withParams({
 	selectedRowBackgroundColor: "oklch(0.74 0.19 192 / 8%)",
 	oddRowBackgroundColor: "oklch(0.13 0.014 252)",
 	cellHorizontalPaddingScale: 1,
+	// Filter popup
+	menuBackgroundColor: "oklch(0.16 0.015 252)",
+	menuSeparatorColor: "oklch(0.28 0.02 252)",
+	panelBackgroundColor: "oklch(0.16 0.015 252)",
+	inputBackgroundColor: "oklch(0.11 0.012 252)",
+	inputBorder: "solid 1px oklch(0.28 0.02 252)",
+	inputFocusBorder: { color: "oklch(0.74 0.19 192)" },
+	checkboxCheckedBackgroundColor: "oklch(0.74 0.19 192)",
+	checkboxCheckedBorderColor: "oklch(0.74 0.19 192)",
+	checkboxUncheckedBackgroundColor: "oklch(0.11 0.012 252)",
+	checkboxUncheckedBorderColor: "oklch(0.35 0.02 252)",
+	popupShadow: "0 8px 24px oklch(0 0 0 / 40%)",
 });
 
 const lightGridTheme = themeQuartz.withParams({
 	backgroundColor: "oklch(1 0 0)",
+	foregroundColor: "oklch(0.145 0 0)",
 	headerBackgroundColor: "oklch(0.97 0 0)",
 	rowHoverColor: "oklch(0.96 0 0)",
 	borderColor: "oklch(0.90 0 0)",
+	chromeBackgroundColor: "oklch(0.96 0 0)",
 	fontFamily: "var(--font-geist, ui-sans-serif)",
 	fontSize: 13,
 	headerFontSize: 11,
@@ -109,7 +140,22 @@ const lightGridTheme = themeQuartz.withParams({
 	selectedRowBackgroundColor: "oklch(0.68 0.19 190 / 8%)",
 	oddRowBackgroundColor: "oklch(0.985 0 0)",
 	cellHorizontalPaddingScale: 1,
+	// Filter popup
+	menuBackgroundColor: "oklch(1 0 0)",
+	menuSeparatorColor: "oklch(0.88 0 0)",
+	panelBackgroundColor: "oklch(1 0 0)",
+	inputBackgroundColor: "oklch(1 0 0)",
+	inputBorder: "solid 1px oklch(0.85 0 0)",
+	inputFocusBorder: { color: "oklch(0.68 0.19 190)" },
+	checkboxCheckedBackgroundColor: "oklch(0.68 0.19 190)",
+	checkboxCheckedBorderColor: "oklch(0.68 0.19 190)",
+	checkboxUncheckedBackgroundColor: "oklch(1 0 0)",
+	checkboxUncheckedBorderColor: "oklch(0.75 0 0)",
+	popupShadow: "0 8px 24px oklch(0 0 0 / 12%)",
 });
+
+const CATEGORIES = assetCategoryEnum.enumValues;
+const STATUSES = assetStatusEnum.enumValues;
 
 interface AssetGridProps {
 	initialData: Asset[];
@@ -122,7 +168,41 @@ export function AssetGrid({ initialData }: AssetGridProps) {
 	const gridRef = useRef<AgGridReact<Asset>>(null);
 	const [rowData, setRowData] = useState<Asset[]>(initialData);
 	const [quickFilter, setQuickFilter] = useState("");
+	const [categoryFilter, setCategoryFilter] = useState<string>("all");
+	const [statusFilter, setStatusFilter] = useState<string>("all");
 	const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
+
+	const hasActiveFilters =
+		categoryFilter !== "all" || statusFilter !== "all" || quickFilter !== "";
+
+	const clearFilters = useCallback(() => {
+		setQuickFilter("");
+		setCategoryFilter("all");
+		setStatusFilter("all");
+		gridRef.current?.api?.setGridOption("quickFilterText", "");
+	}, []);
+
+	const isExternalFilterPresent = useCallback(
+		() => categoryFilter !== "all" || statusFilter !== "all",
+		[categoryFilter, statusFilter],
+	);
+
+	const doesExternalFilterPass = useCallback(
+		(node: IRowNode<Asset>) => {
+			const asset = node.data;
+			if (!asset) return true;
+			if (categoryFilter !== "all" && asset.category !== categoryFilter)
+				return false;
+			if (statusFilter !== "all" && asset.status !== statusFilter) return false;
+			return true;
+		},
+		[categoryFilter, statusFilter],
+	);
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: deps are intentional triggers
+	useEffect(() => {
+		gridRef.current?.api?.onFilterChanged();
+	}, [categoryFilter, statusFilter]);
 
 	const modules = useMemo(
 		() => [
@@ -132,8 +212,8 @@ export function AssetGrid({ initialData }: AssetGridProps) {
 			DateFilterModule,
 			PaginationModule,
 			ColumnAutoSizeModule,
-			RowSelectionModule,
 			QuickFilterModule,
+			ExternalFilterModule,
 			ValidationModule,
 		],
 		[],
@@ -147,15 +227,18 @@ export function AssetGrid({ initialData }: AssetGridProps) {
 				flex: 2,
 				minWidth: 180,
 				filter: "agTextColumnFilter",
-				checkboxSelection: true,
-				headerCheckboxSelection: true,
+				filterParams: {
+					filterOptions: ["contains", "startsWith", "equals"],
+					defaultOption: "contains",
+					maxNumConditions: 1,
+				},
 			},
 			{
 				field: "category",
 				headerName: "Category",
 				flex: 1,
 				minWidth: 120,
-				filter: "agTextColumnFilter",
+				filter: false,
 				cellRenderer: CategoryRenderer,
 			},
 			{
@@ -163,7 +246,7 @@ export function AssetGrid({ initialData }: AssetGridProps) {
 				headerName: "Status",
 				flex: 1,
 				minWidth: 130,
-				filter: "agTextColumnFilter",
+				filter: false,
 				cellRenderer: StatusRenderer,
 			},
 			{
@@ -172,6 +255,11 @@ export function AssetGrid({ initialData }: AssetGridProps) {
 				flex: 1,
 				minWidth: 140,
 				filter: "agTextColumnFilter",
+				filterParams: {
+					filterOptions: ["contains", "startsWith"],
+					defaultOption: "contains",
+					maxNumConditions: 1,
+				},
 			},
 			{
 				field: "model",
@@ -179,6 +267,11 @@ export function AssetGrid({ initialData }: AssetGridProps) {
 				flex: 1,
 				minWidth: 140,
 				filter: "agTextColumnFilter",
+				filterParams: {
+					filterOptions: ["contains", "startsWith"],
+					defaultOption: "contains",
+					maxNumConditions: 1,
+				},
 			},
 			{
 				field: "location",
@@ -186,6 +279,11 @@ export function AssetGrid({ initialData }: AssetGridProps) {
 				flex: 1,
 				minWidth: 130,
 				filter: "agTextColumnFilter",
+				filterParams: {
+					filterOptions: ["contains", "startsWith"],
+					defaultOption: "contains",
+					maxNumConditions: 1,
+				},
 			},
 			{
 				field: "assignedTo",
@@ -193,6 +291,11 @@ export function AssetGrid({ initialData }: AssetGridProps) {
 				flex: 1,
 				minWidth: 140,
 				filter: "agTextColumnFilter",
+				filterParams: {
+					filterOptions: ["contains", "startsWith"],
+					defaultOption: "contains",
+					maxNumConditions: 1,
+				},
 			},
 			{
 				field: "createdAt",
@@ -200,6 +303,12 @@ export function AssetGrid({ initialData }: AssetGridProps) {
 				flex: 1,
 				minWidth: 130,
 				sortable: true,
+				filter: "agDateColumnFilter",
+				filterParams: {
+					filterOptions: ["equals", "lessThan", "greaterThan", "inRange"],
+					defaultOption: "greaterThan",
+					maxNumConditions: 1,
+				},
 				valueFormatter: ({ value }: { value: string | Date }) =>
 					value ? new Date(value).toLocaleDateString() : "—",
 			},
@@ -238,32 +347,92 @@ export function AssetGrid({ initialData }: AssetGridProps) {
 		params.api.sizeColumnsToFit();
 	}, []);
 
-	const onFilterInput = useCallback((value: string) => {
-		setQuickFilter(value);
-		gridRef.current?.api?.setGridOption("quickFilterText", value);
-	}, []);
-
 	return (
 		<div className="flex min-h-0 flex-1 flex-col gap-3">
 			{/* Toolbar */}
-			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-				<div className="flex items-center gap-3">
-					<div className="relative flex-1 sm:flex-none">
+			<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+				<div className="flex flex-wrap items-center gap-2">
+					{/* Quick search */}
+					<div className="relative">
 						<Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
 						<Input
 							placeholder="Search assets..."
 							value={quickFilter}
-							onChange={(e) => onFilterInput(e.target.value)}
-							className="h-9 w-full pl-9 font-mono text-xs sm:w-64"
+							onChange={(e) => {
+								setQuickFilter(e.target.value);
+								gridRef.current?.api?.setGridOption(
+									"quickFilterText",
+									e.target.value,
+								);
+							}}
+							className="h-9 w-52 pl-9 font-mono text-xs"
 						/>
 					</div>
+
+					{/* Category filter */}
+					<Select value={categoryFilter} onValueChange={setCategoryFilter}>
+						<SelectTrigger className="h-9 w-40 font-mono text-xs">
+							<SlidersHorizontal className="mr-1.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+							<SelectValue placeholder="Category" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="all" className="font-mono text-xs">
+								All categories
+							</SelectItem>
+							{CATEGORIES.map((cat) => (
+								<SelectItem
+									key={cat}
+									value={cat}
+									className="font-mono text-xs capitalize"
+								>
+									{cat}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+
+					{/* Status filter */}
+					<Select value={statusFilter} onValueChange={setStatusFilter}>
+						<SelectTrigger className="h-9 w-36 font-mono text-xs">
+							<SelectValue placeholder="Status" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="all" className="font-mono text-xs">
+								All statuses
+							</SelectItem>
+							{STATUSES.map((s) => (
+								<SelectItem
+									key={s}
+									value={s}
+									className="font-mono text-xs capitalize"
+								>
+									{s}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+
+					{/* Clear filters */}
+					{hasActiveFilters && (
+						<Button
+							variant="ghost"
+							size="sm"
+							onClick={clearFilters}
+							className="h-9 gap-1.5 font-mono text-xs text-muted-foreground hover:text-foreground"
+						>
+							<X className="h-3.5 w-3.5" />
+							Clear
+						</Button>
+					)}
+
 					<span className="hidden font-mono text-xs text-muted-foreground tabular-nums sm:inline">
 						{rowData.length} records
 					</span>
 				</div>
+
 				<Button
 					size="sm"
-					onClick={() => router.push("/dashboard/assets/new")}
+					onClick={() => router.push("/assets/new")}
 					className="w-full gap-1.5 sm:w-auto"
 				>
 					<Plus className="h-3.5 w-3.5" />
@@ -280,13 +449,14 @@ export function AssetGrid({ initialData }: AssetGridProps) {
 					columnDefs={columnDefs}
 					defaultColDef={defaultColDef}
 					modules={modules}
-					rowSelection={{ mode: "multiRow" }}
+					isExternalFilterPresent={isExternalFilterPresent}
+					doesExternalFilterPass={doesExternalFilterPass}
 					animateRows
 					pagination
 					paginationPageSize={25}
 					paginationPageSizeSelector={[10, 25, 50, 100]}
 					onGridReady={onGridReady}
-					overlayNoRowsTemplate='<span style="color: oklch(0.52 0.02 252); font-size: 13px; padding: 16px">No assets found. Add your first asset to get started.</span>'
+					overlayNoRowsTemplate='<span style="font-size: 13px; padding: 16px">No assets found.</span>'
 				/>
 			</div>
 

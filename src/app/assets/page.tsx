@@ -1,4 +1,4 @@
-import { AssetTable } from "@/features/assets/components/asset-table";
+import { AssetGrid } from "@/features/assets/components/asset-grid";
 import { getAssets } from "@/features/assets/queries";
 
 export default async function AssetsPage() {
@@ -14,7 +14,7 @@ export default async function AssetsPage() {
 					Manage and track all organizational assets
 				</p>
 			</div>
-			<AssetTable initialData={assets} />
+			<AssetGrid initialData={assets} />
 		</div>
 	);
 }

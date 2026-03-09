@@ -1,26 +1,12 @@
 "use client";
 
-import { LayoutDashboard, Menu, Package } from "lucide-react";
+import { Menu, Package } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-
-const NAV_ITEMS = [
-	{
-		href: "/dashboard",
-		label: "Overview",
-		icon: LayoutDashboard,
-		exact: true,
-	},
-	{
-		href: "/dashboard/assets",
-		label: "Assets",
-		icon: Package,
-		exact: false,
-	},
-];
+import { NAV_ITEMS } from "./nav-items";
 
 export function MobileSidebar() {
 	const [open, setOpen] = useState(false);

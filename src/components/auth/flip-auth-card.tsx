@@ -69,7 +69,10 @@ export function FlipAuthCard() {
 			<div
 				style={{
 					transform: `rotateY(${rotation}deg)`,
-					transition: rotation === -90 ? "none" : "transform 420ms cubic-bezier(0.65, 0, 0.35, 1)",
+					transition:
+						rotation === -90
+							? "none"
+							: "transform 420ms cubic-bezier(0.65, 0, 0.35, 1)",
 				}}
 			>
 				{mode === "signIn" ? (

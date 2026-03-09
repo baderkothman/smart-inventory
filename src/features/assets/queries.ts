@@ -13,17 +13,3 @@ export async function getAssets() {
 		.where(eq(assets.userId, userId))
 		.orderBy(desc(assets.createdAt));
 }
-
-export async function getAssetById(id: string) {
-	const { userId } = await auth();
-	if (!userId) return null;
-
-	const [asset] = await db
-		.select()
-		.from(assets)
-		.where(eq(assets.id, id))
-		.limit(1);
-
-	if (!asset || asset.userId !== userId) return null;
-	return asset;
-}

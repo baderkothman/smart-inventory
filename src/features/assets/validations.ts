@@ -1,17 +1,10 @@
 import { z } from "zod";
+import { assetCategoryEnum, assetStatusEnum } from "@/db/schema";
 
 export const assetFormSchema = z.object({
 	name: z.string().min(1, "Asset name is required"),
-	category: z.enum([
-		"laptop",
-		"monitor",
-		"license",
-		"peripheral",
-		"server",
-		"mobile",
-		"other",
-	]),
-	status: z.enum(["active", "inactive", "maintenance", "retired", "assigned"]),
+	category: z.enum(assetCategoryEnum.enumValues),
+	status: z.enum(assetStatusEnum.enumValues),
 	serialNumber: z.string().optional(),
 	manufacturer: z.string().optional(),
 	model: z.string().optional(),
