@@ -9,64 +9,64 @@ import { assets } from "@/db/schema";
 import { assetFormSchema } from "./validations";
 
 export async function createAsset(data: unknown) {
-	const { userId } = await auth();
-	if (!userId) throw new Error("Unauthorized");
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
 
-	const validated = assetFormSchema.parse(data);
+  const validated = assetFormSchema.parse(data);
 
-	await db.insert(assets).values({
-		userId,
-		name: validated.name,
-		category: validated.category,
-		status: validated.status,
-		serialNumber: validated.serialNumber ?? null,
-		manufacturer: validated.manufacturer ?? null,
-		model: validated.model ?? null,
-		purchaseDate: validated.purchaseDate ?? null,
-		location: validated.location ?? null,
-		assignedTo: validated.assignedTo ?? null,
-		description: validated.description ?? null,
-		notes: validated.notes ?? null,
-	});
+  await db.insert(assets).values({
+    userId,
+    name: validated.name,
+    category: validated.category,
+    status: validated.status,
+    serialNumber: validated.serialNumber ?? null,
+    manufacturer: validated.manufacturer ?? null,
+    model: validated.model ?? null,
+    purchaseDate: validated.purchaseDate ?? null,
+    location: validated.location ?? null,
+    assignedTo: validated.assignedTo ?? null,
+    description: validated.description ?? null,
+    notes: validated.notes ?? null,
+  });
 
-	revalidatePath("/dashboard/assets");
-	redirect("/dashboard/assets");
+  revalidatePath("/assets");
+  redirect("/assets");
 }
 
 export async function updateAsset(id: string, data: unknown) {
-	const { userId } = await auth();
-	if (!userId) throw new Error("Unauthorized");
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
 
-	const validated = assetFormSchema.parse(data);
+  const validated = assetFormSchema.parse(data);
 
-	await db
-		.update(assets)
-		.set({
-			name: validated.name,
-			category: validated.category,
-			status: validated.status,
-			serialNumber: validated.serialNumber ?? null,
-			manufacturer: validated.manufacturer ?? null,
-			model: validated.model ?? null,
-			purchaseDate: validated.purchaseDate ?? null,
-			location: validated.location ?? null,
-			assignedTo: validated.assignedTo ?? null,
-			description: validated.description ?? null,
-			notes: validated.notes ?? null,
-			updatedAt: new Date(),
-		})
-		.where(and(eq(assets.id, id), eq(assets.userId, userId)));
+  await db
+    .update(assets)
+    .set({
+      name: validated.name,
+      category: validated.category,
+      status: validated.status,
+      serialNumber: validated.serialNumber ?? null,
+      manufacturer: validated.manufacturer ?? null,
+      model: validated.model ?? null,
+      purchaseDate: validated.purchaseDate ?? null,
+      location: validated.location ?? null,
+      assignedTo: validated.assignedTo ?? null,
+      description: validated.description ?? null,
+      notes: validated.notes ?? null,
+      updatedAt: new Date(),
+    })
+    .where(and(eq(assets.id, id), eq(assets.userId, userId)));
 
-	revalidatePath("/dashboard/assets");
+  revalidatePath("/assets");
 }
 
 export async function deleteAsset(id: string) {
-	const { userId } = await auth();
-	if (!userId) throw new Error("Unauthorized");
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
 
-	await db
-		.delete(assets)
-		.where(and(eq(assets.id, id), eq(assets.userId, userId)));
+  await db
+    .delete(assets)
+    .where(and(eq(assets.id, id), eq(assets.userId, userId)));
 
-	revalidatePath("/dashboard/assets");
+  revalidatePath("/assets");
 }
