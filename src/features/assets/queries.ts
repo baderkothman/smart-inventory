@@ -14,10 +14,19 @@ export async function getAssets() {
 			.where(eq(assets.userId, userId))
 			.orderBy(desc(assets.createdAt));
 	} catch (error) {
-		// Keep dashboard usable when DB is unreachable or not migrated.
-		console.error(
-			"[getAssets] Database query failed. Check DATABASE_URL and run drizzle migrations.",
-			error,
+		// Avoid passing Error objects to console.error — Next.js dev overlay treats that like an uncaught error.
+		const msg =
+			error instanceof Error
+				? error.message
+				: typeof error === "string"
+					? error
+					: "Unknown error";
+		const cause =
+			error instanceof Error && error.cause instanceof Error
+				? error.cause.message
+				: undefined;
+		console.warn(
+			`[getAssets] ${msg}${cause ? ` (${cause})` : ""}. Check DATABASE_URL matches this project and run migrations if needed.`,
 		);
 		return [];
 	}

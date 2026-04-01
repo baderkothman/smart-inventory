@@ -166,6 +166,7 @@ export function AssetGrid({ initialData }: AssetGridProps) {
 	const { resolvedTheme } = useTheme();
 	const gridTheme = resolvedTheme === "light" ? lightGridTheme : darkGridTheme;
 	const gridRef = useRef<AgGridReact<Asset>>(null);
+	const [mounted, setMounted] = useState(false);
 	const [rowData, setRowData] = useState<Asset[]>(initialData);
 	const [quickFilter, setQuickFilter] = useState("");
 	const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -203,6 +204,10 @@ export function AssetGrid({ initialData }: AssetGridProps) {
 	useEffect(() => {
 		gridRef.current?.api?.onFilterChanged();
 	}, [categoryFilter, statusFilter]);
+
+	useEffect(() => {
+		setMounted(true);
+	}, []);
 
 	const modules = useMemo(
 		() => [
@@ -346,6 +351,15 @@ export function AssetGrid({ initialData }: AssetGridProps) {
 	const onGridReady = useCallback((params: GridReadyEvent) => {
 		params.api.sizeColumnsToFit();
 	}, []);
+
+	if (!mounted) {
+		return (
+			<div className="flex min-h-0 flex-1 flex-col gap-3">
+				<div className="h-9 w-64 rounded-md border border-border bg-muted/30" />
+				<div className="min-h-0 flex-1 rounded-lg border border-border bg-muted/20" />
+			</div>
+		);
+	}
 
 	return (
 		<div className="flex min-h-0 flex-1 flex-col gap-3">
